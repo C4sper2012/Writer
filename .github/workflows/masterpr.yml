@@ -1,4 +1,4 @@
-name: .NET
+name: MasterPR
 
 on:
   pull_request:
