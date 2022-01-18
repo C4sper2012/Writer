@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Merge => master
-        uses: C4sper2012/merge-branch@master
+        uses: Writer/merge-branch@master
         with:
           type: now
           from_branch: develop
