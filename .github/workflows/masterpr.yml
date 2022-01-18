@@ -22,12 +22,12 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
   merge-branch:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
 
       - name: Merge => master
-        uses: Writer/merge-branch@master
         with:
           type: now
           from_branch: develop
