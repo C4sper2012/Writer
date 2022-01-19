@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Writer.Server.Hubs;
-using Writer.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -29,8 +26,4 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<MessageHub>("/messageHub"); //Add this line
-});
 app.Run();
