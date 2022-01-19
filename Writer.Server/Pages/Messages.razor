@@ -37,7 +37,7 @@
     protected override async Task OnInitializedAsync()
     {
         _hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri(@"/messagehub"))
+            .WithUrl(NavigationManager.ToAbsoluteUri("/messageHub"))
             .Build();
 
         _hubConnection.On<Message>("ReceiveMessage",
