@@ -1,5 +1,59 @@
 @page "/"
 
-<PageTitle>Index</PageTitle>
+@using Microsoft.AspNetCore.SignalR.Client;
+@using Writer.Shared
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
-<h1>Hello, @Environment.UserName!</h1>
+<h3>Messages</h3>
+
+<table class="table">
+    <thead class="table-dark">
+    <tr>
+        <th>User Name</th>
+        <th>Text</th>
+        <th>Sent</th>
+        <th>Recieved</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var message in _messages)
+    {
+        <tr>
+            <td>@message.UserName</td>
+            <td>@message.Text</td>
+            <td>@message.Sent:@message.Sent.Millisecond</td>
+            <td>@message.Recieved:@message.Recieved.Millisecond</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+@code {
+    private HubConnection _hubConnection; 
+    private List<Message> _messages = new();
+
+    protected override async Task OnInitializedAsync()
+    { 
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/messageHub"))
+            .Build();
+
+        _hubConnection.On<Message>("ReceiveMessage",
+            (message) =>
+            {
+                message.Recieved = DateTime.Now;
+                _messages.Add(message);
+                StateHasChanged();
+            });
+
+        await _hubConnection.StartAsync();
+    }
+
+    public void Dispose()
+    {
+        _ = _hubConnection?.DisposeAsync();
+    }
+
+}

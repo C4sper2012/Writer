@@ -1,0 +1,80 @@
+@page "/"
+@using Microsoft.AspNetCore.SignalR.Client;
+@using Writer.Shared
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, Client!</h1>
+
+<table class="table">
+    <thead class="table-dark">
+        <tr>
+            <th>User Name</th>
+            <th>Text</th>
+            <th>Sent</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var message in _messages)
+        {
+            <tr>
+                <td>@message.UserName</td>
+                <td>@message.Text</td>
+                <td>@message.Sent</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+<EditForm Model="@_message" OnValidSubmit="SendMessage">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+      <label for="@_message.UserName" class="form-label col-4">User Name</label>
+      <input @bind="@_message.UserName" class="input-group-text form-control">
+    </div>
+    <div class="mb-3">
+        <label for="@_message.Text" class="form-label">Text</label>
+        <textarea @bind="@_message.Text" class="input-group-text col-6 form-control"></textarea>
+    </div>
+    <br />
+    <button class="btn btn-primary" type="submit">Send Message</button>
+</EditForm>
+
+@code {
+    private HubConnection _hubConnection;
+    private List<Message> _messages = new List<Message>();
+    private Message _message = new Message();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri(@"https://localhost:7227/messagehub"))
+            .Build();
+
+        _hubConnection.On<Message>("ReceiveMessage",
+            (message) =>
+            {
+                _messages.Add(message);
+                StateHasChanged();
+            });
+        
+        await _hubConnection.StartAsync();
+    }
+
+    public async Task SendMessage()
+    {
+        _message.Sent = DateTime.Now;
+        await _hubConnection.SendAsync("SendMessage", _message);
+        _message = new Message();
+    }
+
+    public void Dispose()
+    {
+        _ = _hubConnection?.DisposeAsync();
+    }
+
+}
